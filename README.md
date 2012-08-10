@@ -1,4 +1,1 @@
-littleshoot-smack-xmpp-3-2-2
-============================
-
-Fork of Smack XMPP library version 3.2.2
+This is a LittleShoot fork of the Smack XMPP 3.2.2 lib with several customizations, especially for cert handling.
