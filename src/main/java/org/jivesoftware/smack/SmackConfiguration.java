@@ -53,6 +53,8 @@ public final class SmackConfiguration {
     private static boolean localSocks5ProxyEnabled = true;
     private static int localSocks5ProxyPort = 7777;
     private static int packetCollectorSize = 5000;
+    
+    private static boolean dnsSecEnabled;
 
     private SmackConfiguration() {
     }
@@ -340,5 +342,13 @@ public final class SmackConfiguration {
             }
         }
         return loaders.toArray(new ClassLoader[loaders.size()]);
+    }
+
+    public static boolean isDnsSecEnabled() {
+        return dnsSecEnabled;
+    }
+
+    public static void setDnsSecEnabled(final boolean dnsSecEnabled) {
+        SmackConfiguration.dnsSecEnabled = dnsSecEnabled;
     }
 }

@@ -803,7 +803,25 @@ public class XMPPConnection extends Connection {
         // Initialize the reader and writer with the new secured version
         initReaderAndWriter();
         // Proceed to do the handshake
-        ((SSLSocket) socket).startHandshake();
+        //((SSLSocket) socket).startHandshake();
+        
+        final SSLSocket ssl = (SSLSocket) socket;
+        //System.err.println("SUITES: "+Arrays.asList(ssl.getSupportedCipherSuites()));
+        
+        final String[] toUse;
+        final String[] standard = ssl.getEnabledCipherSuites();
+        final String[] cs = config.getCipherSuites();
+        if (cs != null && cs.length > 0) {
+            toUse = cs;
+        } else {
+            toUse = standard;
+        }
+        //log.info("Enabled cipher suites: {}", Arrays.asList(toUse));
+        ssl.setEnabledCipherSuites(toUse);
+         // Proceed to do the handshake
+        ssl.startHandshake();
+                
+
         //if (((SSLSocket) socket).getWantClientAuth()) {
         //    System.err.println("Connection wants client auth");
         //}

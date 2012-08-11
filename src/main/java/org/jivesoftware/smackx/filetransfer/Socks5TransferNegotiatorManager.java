@@ -65,7 +65,7 @@ public class Socks5TransferNegotiatorManager implements FileTransferNegotiatorMa
     }
 
     public StreamNegotiator createNegotiator() {
-        return new Socks5TransferNegotiator(this, connection);
+        return new Socks5TransferNegotiator(this.connection);
     }
 
     public void incrementConnectionFailures(String address) {
@@ -293,6 +293,7 @@ public class Socks5TransferNegotiatorManager implements FileTransferNegotiatorMa
          * @throws IOException
          */
         private String establishSocks5UploadConnection(Socket connection) throws XMPPException, IOException {
+            /*
             OutputStream out = new DataOutputStream(connection.getOutputStream());
             InputStream in = new DataInputStream(connection.getInputStream());
 
@@ -335,6 +336,8 @@ public class Socks5TransferNegotiatorManager implements FileTransferNegotiatorMa
             }
             out.write(cmd);
             return responseDigest;
+            */
+            throw new UnsupportedOperationException("Wasn't compiling");
         }
 
 

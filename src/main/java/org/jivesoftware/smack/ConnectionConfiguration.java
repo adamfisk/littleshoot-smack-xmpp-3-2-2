@@ -83,6 +83,8 @@ public class ConnectionConfiguration implements Cloneable {
     private boolean sendPresence = true;
     private boolean rosterLoadedAtLogin = true;
     private SecurityMode securityMode = SecurityMode.enabled;
+
+    private String[] cipherSuites = {};
 	
 	// Holds the proxy information (such as proxyhost, proxyport, username, password etc)
     protected ProxyInfo proxy;
@@ -720,5 +722,13 @@ public class ConnectionConfiguration implements Cloneable {
         this.username = username;
         this.password = password;
         this.resource = resource;
+    }
+
+    public String[] getCipherSuites() {
+        return cipherSuites;
+    }
+
+    public void setCipherSuites(final String[] cipherSuites) {
+        this.cipherSuites = cipherSuites;
     }
 }
