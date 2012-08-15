@@ -261,7 +261,8 @@ public class Roster {
         // Create and send roster entry creation packet.
         RosterPacket rosterPacket = new RosterPacket();
         rosterPacket.setType(IQ.Type.SET);
-        RosterPacket.Item item = new RosterPacket.Item(user, name);
+        //RosterPacket.Item item = new RosterPacket.Item(user, name);
+        RosterPacket.Item item = new RosterPacket.Item(user, name, null, null, 0, 0, 0, false, "", false, "", "");
         if (groups != null) {
             for (String group : groups) {
                 if (group != null && group.trim().length() > 0) {
@@ -813,6 +814,7 @@ public class Roster {
      */
     private class RosterPacketListener implements PacketListener {
 
+        public RosterPacketListener() {}
         public void processPacket(Packet packet) {
             // Keep a registry of the entries that were added, deleted or updated. An event
             // will be fired for each affected entry
@@ -822,8 +824,9 @@ public class Roster {
 
             RosterPacket rosterPacket = (RosterPacket) packet;
             for (RosterPacket.Item item : rosterPacket.getRosterItems()) {
-                RosterEntry entry = new RosterEntry(item.getUser(), item.getName(),
-                        item.getItemType(), item.getItemStatus(), Roster.this, connection);
+                //RosterEntry entry = new RosterEntry(item.getUser(), item.getName(),
+                //        item.getItemType(), item.getItemStatus(), Roster.this, connection);
+                RosterEntry entry = new RosterEntry(item, Roster.this, connection);
 
                 // If the packet is of the type REMOVE then remove the entry
                 if (RosterPacket.ItemType.remove.equals(item.getItemType())) {

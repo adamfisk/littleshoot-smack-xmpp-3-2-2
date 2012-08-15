@@ -20,6 +20,7 @@
 
 package org.jivesoftware.smack.packet;
 
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.util.StringUtils;
 
 import java.util.*;
@@ -69,7 +70,8 @@ public class RosterPacket extends IQ {
 
     public String getChildElementXML() {
         StringBuilder buf = new StringBuilder();
-        buf.append("<query xmlns=\"jabber:iq:roster\">");
+        //buf.append("<query xmlns=\"jabber:iq:roster\">");
+        buf.append("<query xmlns=\"jabber:iq:roster\" xmlns:gr=\"google:roster\" gr:ext=\"2\">");
         synchronized (rosterItems) {
             for (Item entry : rosterItems) {
                 buf.append(entry.toXML());
@@ -85,11 +87,54 @@ public class RosterPacket extends IQ {
      */
     public static class Item {
 
-        private String user;
+        private final String user;
         private String name;
         private ItemType itemType;
         private ItemStatus itemStatus;
         private final Set<String> groupNames;
+        
+        private final int mc;
+        
+        private final int emc;
+        
+        private final int w;
+        
+        private final boolean rejected;
+        
+        private final String t;
+        
+        private final boolean autosub;
+        
+        private final String aliasFor;
+        
+        private final String inv;
+        
+        public Item(final String user, final String name, 
+            final ItemType itemType, final ItemStatus itemStatus, final int mc, 
+            final int emc, final int w, final boolean rejected, final String t, 
+            final boolean autosub, final String aliasFor, final String inv) {
+            this.user = user.toLowerCase();
+            this.name = name;
+            this.itemType = itemType;
+            this.itemStatus = itemStatus;
+            this.mc = mc;
+            this.emc = emc;
+            this.w = w;
+            this.rejected = rejected;
+            this.t = t;
+            this.autosub = autosub;
+            this.aliasFor = aliasFor;
+            this.inv = inv;
+            this.groupNames = new CopyOnWriteArraySet<String>();
+        }
+
+        public Item(final RosterEntry entry) {
+            this(entry.getUser(), entry.getName(), entry.getType(), 
+                entry.getStatus(), entry.getMc(), entry.getEmc(), entry.getW(),
+                entry.isRejected(), entry.getT(), entry.isAutosub(),
+                entry.getAliasFor(), entry.getInv());
+            //this.groupNames = new CopyOnWriteArraySet<String>();
+        }
 
         /**
          * Creates a new roster item.
@@ -97,12 +142,46 @@ public class RosterPacket extends IQ {
          * @param user the user.
          * @param name the user's name.
          */
+        /*
         public Item(String user, String name) {
             this.user = user.toLowerCase();
             this.name = name;
             itemType = null;
             itemStatus = null;
             groupNames = new CopyOnWriteArraySet<String>();
+        }
+        */
+
+        public int getMc() {
+            return mc;
+        }
+
+        public int getEmc() {
+            return emc;
+        }
+
+        public int getW() {
+            return w;
+        }
+
+        public boolean isRejected() {
+            return rejected;
+        }
+
+        public String getT() {
+            return t;
+        }
+
+        public boolean isAutosub() {
+            return autosub;
+        }
+
+        public String getAliasFor() {
+            return aliasFor;
+        }
+
+        public String getInv() {
+            return inv;
         }
 
         /**

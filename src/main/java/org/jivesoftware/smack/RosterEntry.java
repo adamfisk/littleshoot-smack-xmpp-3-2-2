@@ -22,6 +22,7 @@ package org.jivesoftware.smack;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.RosterPacket;
+import org.jivesoftware.smack.packet.RosterPacket.Item;
 
 import java.util.*;
 
@@ -40,6 +41,22 @@ public class RosterEntry {
     final private Roster roster;
     final private Connection connection;
 
+    private final int mc;
+    
+    private final int emc;
+    
+    private final int w;
+    
+    private final boolean rejected;
+    
+    private final String t;
+    
+    private final boolean autosub;
+    
+    private final String aliasFor;
+    
+    private final String inv;
+
     /**
      * Creates a new roster entry.
      *
@@ -49,12 +66,31 @@ public class RosterEntry {
      * @param status the subscription status (related to subscriptions pending to be approbed).
      * @param connection a connection to the XMPP server.
      */
+    /*
     RosterEntry(String user, String name, RosterPacket.ItemType type,
                 RosterPacket.ItemStatus status, Roster roster, Connection connection) {
         this.user = user;
         this.name = name;
         this.type = type;
         this.status = status;
+        this.roster = roster;
+        this.connection = connection;
+    }
+    */
+
+    public RosterEntry(final Item item, Roster roster, Connection connection) {
+        this.user = item.getUser();
+        this.name = item.getName();
+        this.type = item.getItemType();
+        this.status = item.getItemStatus();
+        this.mc = item.getMc();
+        this.emc = item.getEmc();
+        this.w = item.getW();
+        this.rejected = item.isRejected();
+        this.t = item.getT();
+        this.autosub = item.isAutosub();
+        this.aliasFor = item.getAliasFor();
+        this.inv = item.getInv();
         this.roster = roster;
         this.connection = connection;
     }
@@ -146,6 +182,39 @@ public class RosterEntry {
     public RosterPacket.ItemStatus getStatus() {
         return status;
     }
+    
+
+    public int getMc() {
+        return mc;
+    }
+
+    public int getEmc() {
+        return emc;
+    }
+
+    public int getW() {
+        return w;
+    }
+
+    public boolean isRejected() {
+        return rejected;
+    }
+
+    public String getT() {
+        return t;
+    }
+
+    public boolean isAutosub() {
+        return autosub;
+    }
+
+    public String getAliasFor() {
+        return aliasFor;
+    }
+
+    public String getInv() {
+        return inv;
+    }
 
     public String toString() {
         StringBuilder buf = new StringBuilder();
@@ -226,9 +295,11 @@ public class RosterEntry {
     }
     
     static RosterPacket.Item toRosterItem(RosterEntry entry) {
-        RosterPacket.Item item = new RosterPacket.Item(entry.getUser(), entry.getName());
-        item.setItemType(entry.getType());
-        item.setItemStatus(entry.getStatus());
+        //RosterPacket.Item item = new RosterPacket.Item(entry.getUser(), entry.getName());
+        
+        RosterPacket.Item item = new RosterPacket.Item(entry);//entry.getUser(), entry.getName(), entry.getType(), entry.getStatus(), 0, 0, 0, false, "", false, "", "");
+        //item.setItemType(entry.getType());
+        //item.setItemStatus(entry.getStatus());
         // Set the correct group names for the item.
         for (RosterGroup group : entry.getGroups()) {
             item.addGroupName(group.getName());

@@ -395,16 +395,27 @@ public class PacketParserUtils {
                 if (parser.getName().equals("item")) {
                     String jid = parser.getAttributeValue("", "jid");
                     String name = parser.getAttributeValue("", "name");
-                    // Create packet.
-                    item = new RosterPacket.Item(jid, name);
+                    
                     // Set status.
                     String ask = parser.getAttributeValue("", "ask");
                     RosterPacket.ItemStatus status = RosterPacket.ItemStatus.fromString(ask);
-                    item.setItemStatus(status);
+                    
                     // Set type.
                     String subscription = parser.getAttributeValue("", "subscription");
                     RosterPacket.ItemType type = RosterPacket.ItemType.valueOf(subscription != null ? subscription : "none");
-                    item.setItemType(type);
+                    
+                    final int mc = parseInt(parser.getAttributeValue("google:roster", "mc"));
+                    final int emc = parseInt(parser.getAttributeValue("google:roster", "emc"));
+                    final int w = parseInt(parser.getAttributeValue("google:roster", "w"));
+                    final boolean rejected = parseBoolean(parser.getAttributeValue("google:roster", "rejected"));
+                    final String t = assign(parser, "google:roster", "t");
+                    final boolean autosub = parseBoolean(parser.getAttributeValue("google:roster", "autosub"));
+                    final String aliasFor = assign(parser, "google:roster", "aliasFor");
+                    final String inv = assign(parser, "google:roster", "inv");
+                    
+                    // Create packet.
+                    item = new RosterPacket.Item(jid, name, type, status, mc, emc, w, rejected, t, autosub, aliasFor, inv);
+                    
                 }
                 if (parser.getName().equals("group") && item!= null) {
                     final String groupName = parser.nextText();
@@ -425,7 +436,27 @@ public class PacketParserUtils {
         return roster;
     }
 
-     private static Registration parseRegistration(XmlPullParser parser) throws Exception {
+     private static String assign(final XmlPullParser parser, final String ns,
+         final String name) {
+         final String val = parser.getAttributeValue(ns, name);
+         return val == null ? "" : val;
+    }
+
+    private static boolean parseBoolean(final String str) {
+         if (str == null || str.length() == 0) {
+             return false;
+         }
+         return Boolean.parseBoolean(str);
+    }
+
+    private static int parseInt(final String str) {
+        if (str == null || str.length() == 0) {
+            return 0;
+        }
+        return Integer.parseInt(str);
+    }
+
+    private static Registration parseRegistration(XmlPullParser parser) throws Exception {
         Registration registration = new Registration();
         Map<String, String> fields = null;
         boolean done = false;
