@@ -94,6 +94,7 @@ public class SASLAuthentication implements UserAuthentication {
         registerSASLMechanism("CRAM-MD5", SASLCramMD5Mechanism.class);
         registerSASLMechanism("PLAIN", SASLPlainMechanism.class);
         registerSASLMechanism("ANONYMOUS", SASLAnonymous.class);
+        registerSASLMechanism("X-OAUTH2", SASLGoogleOAuth2Mechanism.class);
 
         supportSASLMechanism("GSSAPI",0);
         supportSASLMechanism("DIGEST-MD5",1);
@@ -213,7 +214,7 @@ public class SASLAuthentication implements UserAuthentication {
      * @return the full JID provided by the server while binding a resource to the connection.
      * @throws XMPPException if an error occures while authenticating.
      */
-    public String authenticate(String username, String resource, CallbackHandler cbh) 
+    public String authenticate(String username, String resource, CallbackHandler cbh)
             throws XMPPException {
         // Locate the SASLMechanism to use
         String selectedMechanism = null;
@@ -529,7 +530,7 @@ public class SASLAuthentication implements UserAuthentication {
     /**
      * Notification message saying that SASL authentication has failed. The server may have
      * closed the connection depending on the number of possible retries.
-     * 
+     *
      * @deprecated replaced by {@see #authenticationFailed(String)}.
      */
     void authenticationFailed() {
@@ -539,7 +540,7 @@ public class SASLAuthentication implements UserAuthentication {
     /**
      * Notification message saying that SASL authentication has failed. The server may have
      * closed the connection depending on the number of possible retries.
-     * 
+     *
      * @param condition the error condition provided by the server.
      */
     void authenticationFailed(String condition) {
@@ -575,7 +576,7 @@ public class SASLAuthentication implements UserAuthentication {
     void sessionsSupported() {
         sessionSupported = true;
     }
-    
+
     /**
      * Initializes the internal state in order to be able to be reused. The authentication
      * is used by the connection at the first login and then reused after the connection
