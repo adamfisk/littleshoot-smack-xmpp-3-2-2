@@ -731,4 +731,8 @@ public class ConnectionConfiguration implements Cloneable {
     public void setCipherSuites(final String[] cipherSuites) {
         this.cipherSuites = cipherSuites;
     }
+
+    public ProxyInfo getProxy() {
+        return proxy;
+    }
 }
