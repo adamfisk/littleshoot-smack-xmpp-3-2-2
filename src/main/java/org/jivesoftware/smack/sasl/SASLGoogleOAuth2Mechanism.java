@@ -6,7 +6,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.TextInputCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Packet;
@@ -100,7 +100,7 @@ public class SASLGoogleOAuth2Mechanism extends SASLMechanism {
     }
 
     private void refreshAccessToken() throws IOException {
-        log.info("Refreshing token with refresh: "+refreshToken+
+        log.debug("Refreshing token with refresh: "+refreshToken+
             "\nclientId: "+clientID+
             "\nclientSecret:"+clientSecret);
         try {
@@ -113,7 +113,7 @@ public class SASLGoogleOAuth2Mechanism extends SASLMechanism {
                     .execute();
             final String token = response.getAccessToken();
             if (StringUtils.isNotBlank(token)) {
-                log.info("Got new access token!!");
+                log.debug("Got new access token!!");
                 accessToken = token;
             } else {
                 log.error("Retreived null access token in: {}", response);
