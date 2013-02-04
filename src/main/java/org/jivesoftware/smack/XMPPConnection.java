@@ -791,9 +791,9 @@ public class XMPPConnection extends Connection {
         }
 
         // Verify certificate presented by the server
-        context.init(kms,
-                new javax.net.ssl.TrustManager[]{new ServerTrustManager(getServiceName(), config)},
-                new java.security.SecureRandom());
+        context.init(null, null, null);//kms,
+                //new javax.net.ssl.TrustManager[]{new ServerTrustManager(getServiceName(), config)},
+                //new java.security.SecureRandom());
         Socket plain = socket;
         // Secure the plain connection
         socket = context.getSocketFactory().createSocket(plain,
