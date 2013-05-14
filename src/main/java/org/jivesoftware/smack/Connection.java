@@ -515,9 +515,9 @@ public abstract class Connection {
      * @param connectionListener a connection listener.
      */
     public void addConnectionListener(ConnectionListener connectionListener) {
-        if (!isConnected()) {
-            throw new IllegalStateException("Not connected to server.");
-        }
+        //if (!isConnected()) {
+            //throw new IllegalStateException("Not connected to server.");
+        //}
         if (connectionListener == null) {
             return;
         }
