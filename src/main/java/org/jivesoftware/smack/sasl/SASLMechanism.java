@@ -20,6 +20,7 @@
 
 package org.jivesoftware.smack.sasl;
 
+import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.packet.Packet;
@@ -108,6 +109,12 @@ public abstract class SASLMechanism implements CallbackHandler {
         Map<String,String> props = new HashMap<String,String>();
         sc = Sasl.createSaslClient(mechanisms, username, "xmpp", host, props, cbh);
         authenticate();
+    }
+    
+
+    public void authenticate(String username, String host,
+            ConnectionConfiguration config) throws IOException, XMPPException {
+        authenticate(username, host, config.getCallbackHandler());
     }
 
     protected void authenticate() throws IOException, XMPPException {

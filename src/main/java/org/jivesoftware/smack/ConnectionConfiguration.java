@@ -24,6 +24,7 @@ import org.jivesoftware.smack.proxy.ProxyInfo;
 import org.jivesoftware.smack.util.DNSUtil;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import javax.security.auth.callback.CallbackHandler;
 import java.io.File;
 
@@ -88,6 +89,14 @@ public class ConnectionConfiguration implements Cloneable {
 	
 	// Holds the proxy information (such as proxyhost, proxyport, username, password etc)
     protected ProxyInfo proxy;
+    
+    /** 
+     * More explicit fallback proxy -- this could use some cleanup since the
+     * above is also used as a fallback proxy in some cases.
+     */
+    private ProxyInfo fallbackProxy;
+    
+    private SSLSocketFactory sslSocketFactory;
 
     /**
      * Creates a new ConnectionConfiguration for the specified service name.
@@ -735,4 +744,21 @@ public class ConnectionConfiguration implements Cloneable {
     public ProxyInfo getProxy() {
         return proxy;
     }
+
+    public ProxyInfo getFallbackProxy() {
+        return fallbackProxy;
+    }
+
+    public void setFallbackProxy(ProxyInfo fallbackProxy) {
+        this.fallbackProxy = fallbackProxy;
+    }
+
+    public SSLSocketFactory getSslSocketFactory() {
+        return sslSocketFactory;
+    }
+
+    public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
+        this.sslSocketFactory = sslSocketFactory;
+    }
+    
 }
