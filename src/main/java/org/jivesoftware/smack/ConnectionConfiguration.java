@@ -20,6 +20,7 @@
 
 package org.jivesoftware.smack;
 
+import org.apache.http.client.HttpClient;
 import org.jivesoftware.smack.proxy.ProxyInfo;
 import org.jivesoftware.smack.util.DNSUtil;
 
@@ -95,6 +96,10 @@ public class ConnectionConfiguration implements Cloneable {
      * above is also used as a fallback proxy in some cases.
      */
     private ProxyInfo fallbackProxy;
+    
+    private HttpClient proxiedHttpClient;
+    
+    private HttpClient directHttpClient;
     
     private SSLSocketFactory sslSocketFactory;
 
@@ -760,5 +765,20 @@ public class ConnectionConfiguration implements Cloneable {
     public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
         this.sslSocketFactory = sslSocketFactory;
     }
-    
+
+    public HttpClient getProxiedHttpClient() {
+        return proxiedHttpClient;
+    }
+
+    public void setProxiedHttpClient(final HttpClient httpClient) {
+        this.proxiedHttpClient = httpClient;
+    }
+
+    public HttpClient getDirectHttpClient() {
+        return directHttpClient;
+    }
+
+    public void setDirectHttpClient(final HttpClient directHttpClient) {
+        this.directHttpClient = directHttpClient;
+    }
 }

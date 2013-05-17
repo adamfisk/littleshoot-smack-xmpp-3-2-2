@@ -1,22 +1,18 @@
 package org.jivesoftware.smack.sasl;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
+import java.util.logging.Handler;
 
-import javax.net.ssl.SSLSocketFactory;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.TextInputCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.HttpClient;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.proxy.ProxyInfo;
 import org.jivesoftware.smack.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +23,7 @@ import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport.Builder;
+import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 
 
@@ -89,8 +84,8 @@ public class SASLGoogleOAuth2Mechanism extends SASLMechanism {
 
     @Override
     public void authenticate(String username, String host,
-            ConnectionConfiguration config) throws IOException, XMPPException {
-        this.config = config;
+            ConnectionConfiguration conf) throws IOException, XMPPException {
+        this.config = conf;
         authenticate(username, host, config.getCallbackHandler());
     }
     
@@ -118,62 +113,27 @@ public class SASLGoogleOAuth2Mechanism extends SASLMechanism {
     }
 
     private void refreshAccessToken() throws IOException {
-        log.debug("Refreshing token with refresh: "+refreshToken+
-            "\nclientId: "+clientID+
-            "\nclientSecret:"+clientSecret);
+        log.debug("Refreshing ACCESS token");
         
-        log.debug("Refreshing token called from:\n{}", dumpStack());
-        
+//        Called from authenticate in this class via:
+//            at org.jivesoftware.smack.SASLAuthentication.authenticate(SASLAuthentication.java:320)
+//            at org.jivesoftware.smack.XMPPConnection.login(XMPPConnection.java:207)
+//            at org.littleshoot.commom.xmpp.GoogleOAuth2Credentials.login(GoogleOAuth2Credentials.java:79)
+//            at org.littleshoot.commom.xmpp.XmppUtils.newConnection(XmppUtils.java:602)
+            
+        //enableLogging();
+        final HttpClient directClient = this.config.getDirectHttpClient();
+        final HttpClient proxiedClient = this.config.getProxiedHttpClient();
         try {
-            refreshAccessToken(new NetHttpTransport());
+            refreshAccessToken(new ApacheHttpTransport(directClient));
         } catch (final IOException e) {
-            // Try with a fallback proxy if we've got one.
-            final HttpTransport ht = newTransportWithFallback();
-            refreshAccessToken(ht);
-        } finally {
-            System.setProperty("https.proxyHost", "");
-            System.setProperty("https.proxyPort", "");
-        }
-    }
-    
-    private HttpTransport newTransportWithFallback() {
-        if (this.config != null) {
-            final ProxyInfo info = this.config.getFallbackProxy();
-            if (info != null) {
-                final String pa = info.getProxyAddress();
-                final int pp = info.getProxyPort();
-                log.debug("Proxy: {}", pa);
-                log.debug("Port: {}", pp);
-                final Proxy proxy = 
-                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress(pa, pp));
-                
-                System.setProperty("https.proxyHost", pa);
-                System.setProperty("https.proxyPort", String.valueOf(pp));
-                
-                final SSLSocketFactory ssl = this.config.getSslSocketFactory();
-                final Builder http = new NetHttpTransport.Builder().setProxy(proxy);
-                if (ssl != null) {
-                    log.debug("Using ssl socket factory");
-                    return http.setSslSocketFactory(ssl).build();
-                } else {
-                    log.debug("No ssl socket factory configured");
-                    return http.build();
-                }
-            } else {
-                log.debug("No fallback proxy configured");
-                return new NetHttpTransport();
-            }
-        } else {
-            log.debug("No config!");
-            return new NetHttpTransport();
+            refreshAccessToken(new ApacheHttpTransport(proxiedClient));
         }
     }
 
     private void refreshAccessToken(final HttpTransport httpTransport) 
             throws IOException {
-        log.debug("Refreshing token with refresh: "+refreshToken+
-            "\nclientId: "+clientID+
-            "\nclientSecret:"+clientSecret);
+        log.debug("Refreshing ACCESS token...");
 
         try {
             final TokenResponse response =
@@ -182,7 +142,8 @@ public class SASLGoogleOAuth2Mechanism extends SASLMechanism {
                         "https://accounts.google.com/o/oauth2/token"), refreshToken)
                     .setClientAuthentication(new ClientParametersAuthentication(
                         clientID, clientSecret))
-                    .execute();
+                        .execute();
+            
             final String token = response.getAccessToken();
             if (StringUtils.isNotBlank(token)) {
                 log.debug("Got new access token!!");
@@ -199,39 +160,26 @@ public class SASLGoogleOAuth2Mechanism extends SASLMechanism {
             throw e;
         }
     }
-    
-    /**
-     * Returns the stack trace as a string.
-     * 
-     * @return The stack trace as a string.
-     */
-    public static String dumpStack() {
-        return dumpStack(new Exception("Stack Dump Generated Exception"));
-    }
 
-    /**
-     * Returns the stack trace as a string.
-     * 
-     * @param cause
-     *            The thread to dump.
-     * @return The stack trace as a string.
-     */
-    public static String dumpStack(final Throwable cause) {
-        if (cause == null) {
-            return "Throwable was null";
-        }
-        final StringWriter sw = new StringWriter();
-        final PrintWriter s = new PrintWriter(sw);
+    private void enableLogging() {
+        // Grab java logs in log4j.
+        final java.util.logging.Logger logger = 
+            java.util.logging.Logger.getLogger(HttpTransport.class.getName());
+        logger.setLevel(java.util.logging.Level.CONFIG);
+        logger.addHandler(new Handler() {
 
-        // This is very close to what Thread.dumpStack does.
-        cause.printStackTrace(s);
+            @Override
+            public void close() throws SecurityException {
+            }
 
-        final String stack = sw.toString();
-        try {
-            sw.close();
-        } catch (final IOException e) {
-        }
-        s.close();
-        return stack;
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void publish(java.util.logging.LogRecord record) {
+                log.debug(record.getMessage());
+            }
+        });
     }
 }
