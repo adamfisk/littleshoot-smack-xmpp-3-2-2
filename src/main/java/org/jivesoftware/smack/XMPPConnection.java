@@ -204,7 +204,7 @@ public class XMPPConnection extends Connection {
             }
             else {
                 response = saslAuthentication
-                        .authenticate(username, resource, config.getCallbackHandler());
+                        .authenticate(username, resource, config);
             }
         }
         else {

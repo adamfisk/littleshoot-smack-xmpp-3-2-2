@@ -210,11 +210,11 @@ public class SASLAuthentication implements UserAuthentication {
      *
      * @param username the username that is authenticating with the server.
      * @param resource the desired resource.
-     * @param cbh the CallbackHandler used to get information from the user
+     * @param config the CallbackHandler used to get information from the user
      * @return the full JID provided by the server while binding a resource to the connection.
      * @throws XMPPException if an error occures while authenticating.
      */
-    public String authenticate(String username, String resource, CallbackHandler cbh)
+    public String authenticate(String username, String resource, CallbackHandler ch)
             throws XMPPException {
         // Locate the SASLMechanism to use
         String selectedMechanism = null;
@@ -235,7 +235,89 @@ public class SASLAuthentication implements UserAuthentication {
                 // Trigger SASL authentication with the selected mechanism. We use
                 // connection.getHost() since GSAPI requires the FQDN of the server, which
                 // may not match the XMPP domain.
-                currentMechanism.authenticate(username, connection.getHost(), cbh);
+                currentMechanism.authenticate(username, connection.getHost(), ch);
+
+                // Wait until SASL negotiation finishes
+                synchronized (this) {
+                    if (!saslNegotiated && !saslFailed) {
+                        try {
+                            wait(30000);
+                        }
+                        catch (InterruptedException e) {
+                            // Ignore
+                        }
+                    }
+                }
+
+                if (saslFailed) {
+                    // SASL authentication failed and the server may have closed the connection
+                    // so throw an exception
+                    if (errorCondition != null) {
+                        throw new XMPPException("SASL authentication " +
+                                selectedMechanism + " failed: " + errorCondition);
+                    }
+                    else {
+                        throw new XMPPException("SASL authentication failed using mechanism " +
+                                selectedMechanism);
+                    }
+                }
+
+                if (saslNegotiated) {
+                    // Bind a resource for this connection and
+                    return bindResourceAndEstablishSession(resource);
+                } else {
+                    // SASL authentication failed
+                }
+            }
+            catch (XMPPException e) {
+                throw e;
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            throw new XMPPException("SASL Authentication failed. No known authentication mechanisims.");
+        }
+        throw new XMPPException("SASL authentication failed");
+    }
+    
+    /**
+     * Performs SASL authentication of the specified user. If SASL authentication was successful
+     * then resource binding and session establishment will be performed. This method will return
+     * the full JID provided by the server while binding a resource to the connection.<p>
+     *
+     * The server may assign a full JID with a username or resource different than the requested
+     * by this method.
+     *
+     * @param username the username that is authenticating with the server.
+     * @param resource the desired resource.
+     * @param config the CallbackHandler used to get information from the user
+     * @return the full JID provided by the server while binding a resource to the connection.
+     * @throws XMPPException if an error occures while authenticating.
+     */
+    public String authenticate(String username, String resource, ConnectionConfiguration config)
+            throws XMPPException {
+        // Locate the SASLMechanism to use
+        String selectedMechanism = null;
+        for (String mechanism : mechanismsPreferences) {
+            if (implementedMechanisms.containsKey(mechanism) &&
+                    serverMechanisms.contains(mechanism)) {
+                selectedMechanism = mechanism;
+                break;
+            }
+        }
+        if (selectedMechanism != null) {
+            // A SASL mechanism was found. Authenticate using the selected mechanism and then
+            // proceed to bind a resource
+            try {
+                Class mechanismClass = implementedMechanisms.get(selectedMechanism);
+                Constructor constructor = mechanismClass.getConstructor(SASLAuthentication.class);
+                currentMechanism = (SASLMechanism) constructor.newInstance(this);
+                // Trigger SASL authentication with the selected mechanism. We use
+                // connection.getHost() since GSAPI requires the FQDN of the server, which
+                // may not match the XMPP domain.
+                currentMechanism.authenticate(username, connection.getHost(), config);
 
                 // Wait until SASL negotiation finishes
                 synchronized (this) {

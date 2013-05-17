@@ -47,6 +47,24 @@ interface UserAuthentication {
      * @return the full JID provided by the server while binding a resource for the connection.
      * @throws XMPPException if an error occurs while authenticating.
      */
+    String authenticate(String username, String resource, ConnectionConfiguration cc) throws
+            XMPPException;
+    
+    /**
+     * Authenticates the user with the server.  This method will return the full JID provided by
+     * the server.  The server may assign a full JID with a username and resource different than
+     * requested by this method.
+     *
+     * Note that using callbacks is the prefered method of authenticating users since it allows
+     * more flexability in the mechanisms used.
+     *
+     * @param username the requested username (authorization ID) for authenticating to the server
+     * @param resource the requested resource.
+     * @param cbh the CallbackHandler used to obtain authentication ID, password, or other
+     * information
+     * @return the full JID provided by the server while binding a resource for the connection.
+     * @throws XMPPException if an error occurs while authenticating.
+     */
     String authenticate(String username, String resource, CallbackHandler cbh) throws
             XMPPException;
 
