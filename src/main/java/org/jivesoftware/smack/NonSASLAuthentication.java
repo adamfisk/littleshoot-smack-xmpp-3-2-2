@@ -54,6 +54,13 @@ class NonSASLAuthentication implements UserAuthentication {
             throw new XMPPException("Unable to determine password.",e);
         }   
     }
+    
+
+    @Override
+    public String authenticate(String username, String resource,
+            ConnectionConfiguration cc) throws XMPPException {
+        return authenticate(username, resource, cc.getCallbackHandler());
+    }
 
     public String authenticate(String username, String password, String resource) throws
             XMPPException {
