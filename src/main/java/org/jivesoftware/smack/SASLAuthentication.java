@@ -94,7 +94,6 @@ public class SASLAuthentication implements UserAuthentication {
         registerSASLMechanism("CRAM-MD5", SASLCramMD5Mechanism.class);
         registerSASLMechanism("PLAIN", SASLPlainMechanism.class);
         registerSASLMechanism("ANONYMOUS", SASLAnonymous.class);
-        registerSASLMechanism("X-OAUTH2", SASLGoogleOAuth2Mechanism.class);
 
         supportSASLMechanism("GSSAPI",0);
         supportSASLMechanism("DIGEST-MD5",1);

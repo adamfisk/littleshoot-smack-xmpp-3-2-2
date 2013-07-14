@@ -20,14 +20,13 @@
 
 package org.jivesoftware.smack;
 
-import org.apache.http.client.HttpClient;
-import org.jivesoftware.smack.proxy.ProxyInfo;
-import org.jivesoftware.smack.util.DNSUtil;
+import java.io.File;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 import javax.security.auth.callback.CallbackHandler;
-import java.io.File;
+
+import org.jivesoftware.smack.proxy.ProxyInfo;
+import org.jivesoftware.smack.util.DNSUtil;
 
 /**
  * Configuration to use while establishing the connection to the server. It is possible to
@@ -87,22 +86,10 @@ public class ConnectionConfiguration implements Cloneable {
     private SecurityMode securityMode = SecurityMode.enabled;
 
     private String[] cipherSuites = {};
-	
-	// Holds the proxy information (such as proxyhost, proxyport, username, password etc)
+
+    // Holds the proxy information (such as proxyhost, proxyport, username, password etc)
     protected ProxyInfo proxy;
     
-    /** 
-     * More explicit fallback proxy -- this could use some cleanup since the
-     * above is also used as a fallback proxy in some cases.
-     */
-    private ProxyInfo fallbackProxy;
-    
-    private HttpClient proxiedHttpClient;
-    
-    private HttpClient directHttpClient;
-    
-    private SSLSocketFactory sslSocketFactory;
-
     /**
      * Creates a new ConnectionConfiguration for the specified service name.
      * A DNS SRV lookup will be performed to find out the actual host address
@@ -748,37 +735,5 @@ public class ConnectionConfiguration implements Cloneable {
 
     public ProxyInfo getProxy() {
         return proxy;
-    }
-
-    public ProxyInfo getFallbackProxy() {
-        return fallbackProxy;
-    }
-
-    public void setFallbackProxy(ProxyInfo fallbackProxy) {
-        this.fallbackProxy = fallbackProxy;
-    }
-
-    public SSLSocketFactory getSslSocketFactory() {
-        return sslSocketFactory;
-    }
-
-    public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
-        this.sslSocketFactory = sslSocketFactory;
-    }
-
-    public HttpClient getProxiedHttpClient() {
-        return proxiedHttpClient;
-    }
-
-    public void setProxiedHttpClient(final HttpClient httpClient) {
-        this.proxiedHttpClient = httpClient;
-    }
-
-    public HttpClient getDirectHttpClient() {
-        return directHttpClient;
-    }
-
-    public void setDirectHttpClient(final HttpClient directHttpClient) {
-        this.directHttpClient = directHttpClient;
     }
 }
